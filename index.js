@@ -1,3 +1,4 @@
+const res = require("express/lib/response");
 const inquirer = require("inquirer");
 const db = require("./db/connection");
 
@@ -54,6 +55,28 @@ const getEmployeeInfo = () => {
   ]);
 };
 
+const selectEmployeeToUpdate = () => {
+  const employeeNames = [];
+  db.query(`SELECT first_name, last_name FROM employees`),
+    (err, rows) => {
+      if (err) {
+        console.log({ error: err.message });
+        return;
+      }
+      rows.forEach((element) => employeeNames.push(element.rows));
+      console.log(employeeNames);
+      return employeeNames;
+    };
+  inquirer.prompt([
+    {
+      type: "list",
+      message: "Which employee's role would you like to update?",
+      name: "employeeList",
+      choices: [employeeNames],
+    },
+  ]);
+};
+
 //Query Functions
 
 const viewAllEmployees = () => {
@@ -71,7 +94,7 @@ const addEmployee = (employee) => {
         console.log({ error: err.message });
         return;
       }
-      console.table(rows);
+      console.log("Employee added to database!");
     }
   );
 };
@@ -92,12 +115,13 @@ promptUser().then((response) => {
   if (response.menu === "View All Employees") {
     viewAllEmployees();
   } else if (response.menu === "Add Employee") {
-    getEmployeeInfo().then((employeeData) => {
-      console.log(employeeData);
-      addEmployee(employeeData);
-    });
+    getEmployeeInfo()
+      .then((employeeData) => {
+        addEmployee(employeeData);
+      })
+      .then(promptUser());
   } else if (response.menu === "Update Employee Role") {
-    console.log("Update Employee Role");
+    selectEmployeeToUpdate();
   } else if (response.menu === "View All Roles") {
     viewAllRoles();
   } else if (response.menu === "Add Role") {
