@@ -29,12 +29,51 @@ const promptUser = () => {
   ]);
 };
 
+const getEmployeeInfo = () => {
+  return inquirer.prompt([
+    {
+      type: "input",
+      name: "first_name",
+      message: "First Name?",
+    },
+    {
+      type: "input",
+      name: "last_name",
+      message: "Last Name?",
+    },
+    {
+      type: "list",
+      name: "role",
+      message: "What is their role?",
+      choices: [
+        { name: "Cashier", value: 1 },
+        { name: "Grocery Stocker", value: 5 },
+        { name: "Grocery Manager", value: 3 },
+      ],
+    },
+  ]);
+};
+
 //Query Functions
 
 const viewAllEmployees = () => {
   db.query(`SELECT * FROM employees`, (err, rows) => {
     console.table(rows);
   });
+};
+
+const addEmployee = (employee) => {
+  const { first_name, last_name, role } = employee;
+  db.query(
+    `INSERT INTO employees (first_name, last_name, role_id) VALUES ("${employee.first_name}", "${employee.last_name}", "${employee.role}")`,
+    (err, rows) => {
+      if (err) {
+        console.log({ error: err.message });
+        return;
+      }
+      console.table(rows);
+    }
+  );
 };
 
 const viewAllRoles = () => {
@@ -50,10 +89,13 @@ const viewAllDepartments = () => {
 };
 
 promptUser().then((response) => {
-  if (response.menu === "View All Emmployees") {
+  if (response.menu === "View All Employees") {
     viewAllEmployees();
   } else if (response.menu === "Add Employee") {
-    console.log("chose add employee");
+    getEmployeeInfo().then((employeeData) => {
+      console.log(employeeData);
+      addEmployee(employeeData);
+    });
   } else if (response.menu === "Update Employee Role") {
     console.log("Update Employee Role");
   } else if (response.menu === "View All Roles") {
