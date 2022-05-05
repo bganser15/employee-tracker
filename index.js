@@ -1,5 +1,4 @@
 const inquirer = require("inquirer");
-const Prompt = require("inquirer/lib/prompts/base");
 const db = require("./db/connection");
 
 //ask user what they would like to do
@@ -39,7 +38,13 @@ const viewAllEmployees = () => {
 };
 
 const viewAllRoles = () => {
-  db.query(`SELECT * FROM role`, (err, rows) => {
+  return db.query(`SELECT * FROM role`, (err, rows) => {
+    console.table(rows);
+  });
+};
+
+const viewAllDepartments = () => {
+  return db.query(`SELECT * FROM department`, (err, rows) => {
     console.table(rows);
   });
 };
@@ -55,6 +60,8 @@ promptUser().then((response) => {
     viewAllRoles();
   } else if (response.menu === "Add Role") {
     console.log("chose add role");
+  } else if (response.menu === "View All Departments") {
+    viewAllDepartments();
   } else if (response.menu === "Add Department") {
     console.log("chose add dpt");
   }

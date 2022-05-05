@@ -12,7 +12,7 @@ const db = mysql.createConnection(
     password: process.env.DB_PW,
     database: "fresh_market",
   },
-  console.log("Connected to the election database.")
+  console.log("Connected to the Fresh Market database.")
 );
 
 module.exports = db;
