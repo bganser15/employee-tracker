@@ -55,18 +55,19 @@ const getEmployeeInfo = () => {
   ]);
 };
 
-const selectEmployeeToUpdate = () => {
-  const employeeNames = [];
-  db.query(`SELECT first_name, last_name FROM employees`),
-    (err, rows) => {
-      if (err) {
-        console.log({ error: err.message });
-        return;
-      }
-      rows.forEach((element) => employeeNames.push(element.rows));
-      console.log(employeeNames);
-      return employeeNames;
-    };
+const displayEmployeeToUpdate = () => {
+  db.query(`SELECT first_name, last_name, id FROM employees`, (err, rows) => {
+    if (err) {
+      console.log({ error: err.message });
+      return;
+    }
+    const employeeNames = Object.values(rows);
+    console.log(employeeNames);
+    return employeeNames;
+  });
+};
+
+const selectEmployee = (employeeArray) => {
   inquirer.prompt([
     {
       type: "list",
@@ -76,7 +77,6 @@ const selectEmployeeToUpdate = () => {
     },
   ]);
 };
-
 //Query Functions
 
 const viewAllEmployees = () => {
@@ -86,7 +86,7 @@ const viewAllEmployees = () => {
 };
 
 const addEmployee = (employee) => {
-  const { first_name, last_name, role } = employee;
+  const { first_name, last_name, id } = employee;
   db.query(
     `INSERT INTO employees (first_name, last_name, role_id) VALUES ("${employee.first_name}", "${employee.last_name}", "${employee.role}")`,
     (err, rows) => {
@@ -94,7 +94,6 @@ const addEmployee = (employee) => {
         console.log({ error: err.message });
         return;
       }
-      console.log("Employee added to database!");
     }
   );
 };
@@ -105,10 +104,61 @@ const viewAllRoles = () => {
   });
 };
 
+const addRole = () => {
+  return inquirer.prompt([
+    {
+      type: "input",
+      name: "newRoleName",
+      message: "What role would you like to add?",
+    },
+    {
+      type: "input",
+      name: "newRoleSalary",
+      message: "What is the yearly salary?",
+    },
+  ]);
+};
+
+const addRoletoDatabase = (newRole) => {
+  const { newRoleName, newRoleSalary } = newRole;
+  db.query(
+    `INSERT INTO role (title, salary) VALUES ("${newRole.newRoleName}", "${newRole.newRoleSalary}")`,
+    (err, rows) => {
+      if (err) {
+        console.log({ error: err.message });
+        return;
+      }
+      console.log("New role added!");
+    }
+  );
+};
+
 const viewAllDepartments = () => {
   return db.query(`SELECT * FROM department`, (err, rows) => {
     console.table(rows);
   });
+};
+
+const addDepartment = () => {
+  return inquirer.prompt([
+    {
+      type: "input",
+      name: "deptName",
+      message: "What department would you like to add?",
+    },
+  ]);
+};
+
+const addDeptToDatabase = (newDepartment) => {
+  db.query(
+    `INSERT INTO department (dept_name) VALUES( "${newDepartment.deptName}")`,
+    (err, rows) => {
+      if (err) {
+        console.log("Unable to add department");
+      }
+      console.log("New department added!");
+    }
+  );
 };
 
 promptUser().then((response) => {
@@ -121,14 +171,18 @@ promptUser().then((response) => {
       })
       .then(promptUser());
   } else if (response.menu === "Update Employee Role") {
-    selectEmployeeToUpdate();
+    displayEmployeeToUpdate();
   } else if (response.menu === "View All Roles") {
     viewAllRoles();
   } else if (response.menu === "Add Role") {
-    console.log("chose add role");
+    addRole().then((newRoleData) => {
+      addRoletoDatabase(newRoleData);
+    });
   } else if (response.menu === "View All Departments") {
     viewAllDepartments();
   } else if (response.menu === "Add Department") {
-    console.log("chose add dpt");
+    addDepartment().then((newDepartmentData) => {
+      addDeptToDatabase(newDepartmentData);
+    });
   }
 });
