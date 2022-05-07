@@ -68,6 +68,7 @@ const displayEmployeeToUpdate = async function () {
   return employeeNames;
 };
 
+//inquirer prompt to select employee
 const selectEmployee = (employeeArray) => {
   inquirer.prompt([
     {
