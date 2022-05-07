@@ -55,16 +55,18 @@ const getEmployeeInfo = () => {
   ]);
 };
 
-const displayEmployeeToUpdate = () => {
+const displayEmployeeToUpdate = async function () {
+  let employeeNames = [];
   db.query(`SELECT first_name, last_name, id FROM employees`, (err, rows) => {
+    employeeNames = rows.map((item) => {
+      item.first_name + " " + item.last_name;
+    });
     if (err) {
       console.log({ error: err.message });
       return;
     }
-    const employeeNames = Object.values(rows);
-    console.log(employeeNames);
-    return employeeNames;
   });
+  return employeeNames;
 };
 
 const selectEmployee = (employeeArray) => {
@@ -73,10 +75,11 @@ const selectEmployee = (employeeArray) => {
       type: "list",
       message: "Which employee's role would you like to update?",
       name: "employeeList",
-      choices: [employeeNames],
+      choices: [employeeArray],
     },
   ]);
 };
+
 //Query Functions
 
 const viewAllEmployees = () => {
@@ -86,7 +89,7 @@ const viewAllEmployees = () => {
 };
 
 const addEmployee = (employee) => {
-  const { first_name, last_name, id } = employee;
+  //const { first_name, last_name, id } = employee;
   db.query(
     `INSERT INTO employees (first_name, last_name, role_id) VALUES ("${employee.first_name}", "${employee.last_name}", "${employee.role}")`,
     (err, rows) => {
@@ -162,24 +165,37 @@ const addDeptToDatabase = (newDepartment) => {
 };
 
 promptUser().then((response) => {
+  //View all employees
   if (response.menu === "View All Employees") {
     viewAllEmployees();
+
+    //Add an employee
   } else if (response.menu === "Add Employee") {
-    getEmployeeInfo()
-      .then((employeeData) => {
-        addEmployee(employeeData);
-      })
-      .then(promptUser());
+    getEmployeeInfo().then((employeeData) => {
+      addEmployee(employeeData);
+    });
+
+    //Update employee role
   } else if (response.menu === "Update Employee Role") {
-    displayEmployeeToUpdate();
+    displayEmployeeToUpdate().then((employeeArray) => {
+      selectEmployee(employeeArray);
+    });
+
+    //View all roles
   } else if (response.menu === "View All Roles") {
     viewAllRoles();
+
+    //Add a role
   } else if (response.menu === "Add Role") {
     addRole().then((newRoleData) => {
       addRoletoDatabase(newRoleData);
     });
+
+    //View all departments
   } else if (response.menu === "View All Departments") {
     viewAllDepartments();
+
+    //Add a department
   } else if (response.menu === "Add Department") {
     addDepartment().then((newDepartmentData) => {
       addDeptToDatabase(newDepartmentData);
