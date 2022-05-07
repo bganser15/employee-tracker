@@ -1,7 +1,7 @@
 const res = require("express/lib/response");
 const inquirer = require("inquirer");
 const db = require("./db/connection");
-
+let employeeNames = [];
 //ask user what they would like to do
 //view all employees - select all from sql table
 //add employee --add a column
@@ -56,7 +56,6 @@ const getEmployeeInfo = () => {
 };
 
 const displayEmployeeToUpdate = async function () {
-  let employeeNames = [];
   db.query(`SELECT first_name, last_name, id FROM employees`, (err, rows) => {
     employeeNames = rows.map((item) => {
       item.first_name + " " + item.last_name;
@@ -75,7 +74,7 @@ const selectEmployee = (employeeArray) => {
       type: "list",
       message: "Which employee's role would you like to update?",
       name: "employeeList",
-      choices: [employeeArray],
+      choices: employeeArray,
     },
   ]);
 };
@@ -177,8 +176,8 @@ promptUser().then((response) => {
 
     //Update employee role
   } else if (response.menu === "Update Employee Role") {
-    displayEmployeeToUpdate().then((employeeArray) => {
-      selectEmployee(employeeArray);
+    displayEmployeeToUpdate().then((employeeNameArray) => {
+      selectEmployee(employeeNameArray);
     });
 
     //View all roles
